@@ -24,6 +24,8 @@ Redis에 관심을 두고 여러 기능을 직접 테스트하다가 Jedis 이�
 
 이 작업으로 Redis 서버 명령이 Jedis의 프로토콜 정의, 응답 변환, 동기·파이프라인 API에 어떻게 연결되는지 살펴봤다. 문자열과 바이너리 호출을 모두 구현하고, 요소 추가·삭제 전후를 통합 테스트에서 확인하면서 서버 기능을 클라이언트 API로 노출할 때 검증해야 할 범위를 익혔다. [구현 및 통합 테스트](https://github.com/redis/jedis/pull/4599/files)
 
+첫 Swagger Core PR 병합 회고에서 이슈를 직접 찾아 기여할 자신감을 얻었다고 기록했다. Jedis에서는 Redis 기능 실습을 출발점으로 삼아 메인테이너가 제안한 기능을 찾아 구현하는 방식으로 이어갔다. [첫 PR 병합 회고](https://parkjunbackend.tistory.com/193), [Jedis 기능 요청](https://github.com/redis/jedis/issues/4594)
+
 ## 결과
 
 PR이 병합됐다. 동기 호출과 파이프라인에서 벡터 집합의 요소 존재 여부를 확인할 수 있게 됐다.
