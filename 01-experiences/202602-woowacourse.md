@@ -34,6 +34,25 @@ impact: "예약·결제 미션에서 트랜잭션 경계를 다루고, HTTP 서�
 | 레벨 3 · 가치가챠 팀 프로젝트 | 백엔드 개발자로 매장·가챠 API와 공간 조회, 검색·색인 동기화, 소셜 로그인, 초기 모니터링을 구현했다. B2B 데이터 수집, 관심 기반 추천 알림과 채팅 성능 개선까지 이어서 작업했다. 각 작업의 PR·커밋과 채팅 부하 테스트 조건은 프로젝트 문서에 기록했다. [가치가챠 경험 문서](202607-gachigacha.md), [B2C 저장소](https://github.com/woowacourse-teams/2026-gachi-gacha), [B2B 저장소](https://github.com/woowacourse-teams/2026-gachi-gacha-b2b) |
 | 레벨 4 · 백엔드 프레임워크 내부 구현 | 소켓 기반 HTTP 서버에서 로그인 흐름을 만들고 스레드 풀로 동시 요청을 처리했다. MVC 미션에서는 애너테이션 기반 핸들러 매핑과 JSON View를 구현했다. JDBC 미션에서는 `TransactionSynchronizationManager`와 `DataSourceUtils`를 구현해 스레드에 바인딩된 커넥션을 재사용하고, 정리 시 `ThreadLocal`을 제거했다. [HTTP 서버 PR](https://github.com/woowacourse/java-http/pull/1289), [MVC PR](https://github.com/woowacourse/java-mvc/pull/1172), [JDBC PR](https://github.com/woowacourse/java-jdbc/pull/1375) |
 
+## 블로그에 기록한 기술적 판단과 검증
+
+### 레벨 1 · 객체의 책임과 협력부터 설계
+
+블랙잭 리뷰에서 Service와 Controller의 역할과 필요성을 질문받았다. 이후 『객체지향의 사실과 오해』를 읽고, 클래스부터 나누던 방식에서 도메인 객체가 협력하려면 어떤 메시지를 주고받아야 하는지 먼저 정하는 방식으로 설계 순서를 바꿨다. 객체를 재사용하는 경량 패턴도 생성 비용만 보고 선택하기보다 JVM의 객체 할당과 GC까지 고려해 판단해야 할 대상으로 다뤘다. [레벨 1 전체 회고](https://parkjunbackend.tistory.com/204)
+
+### 레벨 2 · 예약 정합성과 결제 실패 처리
+
+- **예약 변경의 트랜잭션 경계** — 확정 예약 변경 중 충돌이 나면 예외를 잡아 대기 예약으로 전환하려 했다. 내부 작업이 같은 물리 트랜잭션에 합류한 상태에서 롤백 전용으로 표시돼, 외부에서 예외를 처리한 뒤에도 커밋 시 `UnexpectedRollbackException`이 발생했다. 충돌 가능성이 있는 변경을 `REQUIRES_NEW`로 격리했다. 별도의 통합 테스트에서는 같은 슬롯에 20개 요청을 동시에 보내 1건 확정·19건 대기를 확인했고, 대기자 승격 저장을 강제로 실패시켜 대기자 데이터가 롤백으로 보존되는지도 확인했다. [레벨 2 전체 회고](https://parkjunbackend.tistory.com/206)
+- **토스페이먼츠 연동** — 결제사 DTO와 오류 응답을 어댑터에서 도메인 모델과 예외로 변환했다. 승인 요청의 읽기 타임아웃은 결제 결과를 모르는 상태로 보고, 재시도 시 같은 멱등 키를 유지하는 이유를 정리했다. 토큰 버킷을 인바운드와 아웃바운드에 적용해 서버 요청과 결제사 호출을 각각 제한했다. 인터셉터와 `@Retryable`의 재시도가 중첩될 수 있다는 점도 검토했다. [토스페이먼츠 연동 회고](https://parkjunbackend.tistory.com/207)
+
+### 레벨 3 · 배포 제약에 맞춘 CI/CD 구성
+
+EC2의 SSH 접근 제약으로 GitHub Actions에서 SSH로 배포하는 초기 구상을 바꿨다. EC2 내부에서 Jenkins와 GitHub Webhook을 연결하는 방식을 시도한 뒤 GitHub Actions Self-hosted Runner를 도입했다. 이 과정에서 프리티어 EC2에서 Spring Boot를 빌드할 때의 메모리 제약과 Runner 서비스 계정의 실행 권한 문제도 기록했다. [Self-hosted Runner 도입 회고](https://parkjunbackend.tistory.com/208)
+
+### 레벨 4 · 교환 기능을 위한 OIDC 로그인
+
+지도 탐색에 사용자 간 교환을 추가하면서 회원 인증이 필요해졌다. 제공자별 프로필 응답을 처리하던 기존 소셜 로그인 경험을 바탕으로 OIDC의 ID 토큰을 활용하는 방식을 학습하고 적용했다. 제공자별 구현체를 두고 공통 인증 흐름에서 적절한 구현체를 선택하도록 구성했다. 이후 기술 글에서는 서버 내부와 브라우저 전체를 나눠 로그인 시간을 계측했다. [OIDC 기반 로그인 구현기](https://parkjunbackend.tistory.com/209)
+
 ## 가치가챠에서 팀과 문제를 해결한 경험
 
 - **인프라 설계와 사용자 조사** — 개발·운영 환경에 모니터링, 로그, 대시보드를 어떻게 연결할지 칠판에 그려 팀과 검토했다. 팀원은 그 설계를 바탕으로 후속 설정을 진행할 수 있었다고 피드백했다. 홍대 가챠샵 인근에서는 팀원들과 스티커 조사판으로 의견을 모았고, 팀은 조사 결과를 교환 기능을 추가하는 근거로 활용했다. [LMS+ 스프린트 1 팀원 피드백](https://techcourse-lms-plus-web.woowahan.com/feedbacks/me)
