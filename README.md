@@ -13,3 +13,23 @@
 1. **팩트와 수치 중심:** 추상적인 표현 대신 문제 상황, 해결 과정, 정량적 개선 지표(성능, 지연시간, 트래픽 등)를 명확히 기록한다.
 2. **원자적 분리:** 프로젝트별, 트러블슈팅별, 기술 스택별로 문서를 쪼개어 LLM이 필요한 조각만 쏙쏙 가져갈 수 있게 한다.
 3. **꾸준한 현행화:** 새로운 삽질이나 성과가 생길 때마다 `git commit`으로 노역 일지를 추가한다.
+
+```
+프로젝트/경력 (01-experiences/): [연도월]-[프로젝트/회사명]-[역할].md
+
+예: 202607-gachagacha-backend.md
+
+예: 202407-gaonplatform-intern.md
+
+트러블슈팅 (02-troubleshooting/): [주제/기술]-[핵심문제요약].md
+
+예: postgis-spatial-query-optimization.md
+
+예: ec2-oom-cicd-runner-migration.md
+
+오픈소스/학술 (03-opensource-research/): [유형]-[대상]-[핵심내용].md
+
+예: oss-spring-framework-html-unescape.md
+
+예: paper-autoencoder-data-augmentation.md
+```
