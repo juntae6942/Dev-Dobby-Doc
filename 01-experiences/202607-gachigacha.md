@@ -75,7 +75,7 @@ B2B 집계 대상 PR은 1건이며 열려 있다. 같은 검색 브랜치에서 
 
 ### STOMP 채팅방 목록 갱신 성능 개선
 
-- k6로 dev 서버에서 WebSocket 500개 연결을 확인했다. 로컬에서는 구간별 Timer와 STOMP 채널 큐 대기를 계측하고, 메시지 전송마다 반복되는 채팅방 목록 갱신 조회를 projection으로 통합했다. 코드 경로 기준 참여자당 조회가 7회에서 2회로 줄었고, 참여자 ID 조회까지 포함한 정상 1:1 채팅방 갱신 경로는 메시지당 15회에서 5회로 줄었다. [PR #731](https://github.com/woowacourse-teams/2026-gachi-gacha/pull/731), [채팅 성능 개선 실험 보고서](../02-trobleshooting/chat-performance-improvement.md)
+- k6로 dev 서버에서 WebSocket 500개 연결을 확인했다. 로컬에서는 구간별 Timer와 STOMP 채널 큐 대기를 계측하고, 메시지 전송마다 반복되는 채팅방 목록 갱신 조회를 projection으로 통합했다. 코드 경로 기준 참여자당 조회가 7회에서 2회로 줄었고, 참여자 ID 조회까지 포함한 정상 1:1 채팅방 갱신 경로는 메시지당 15회에서 5회로 줄었다. [PR #731](https://github.com/woowacourse-teams/2026-gachi-gacha/pull/731), [채팅 성능 개선 실험 보고서](../02-trobleshooting/202611-chat-performance-improvement.md)
 - 로컬 275소켓에서 소켓당 초당 1건을 60초 동안 전송했다. 변경 직전 1회에서 p95는 80ms였고, 변경 후 3회에서 18ms, 66ms, 21ms였다. 변경 후 3회 모두 전달률 100%, STOMP 오류 0건이었다. 11월 19일 기준 PR은 열려 있으며, 측정 수치는 해당 로컬 조건에 한정된다. [PR #731](https://github.com/woowacourse-teams/2026-gachi-gacha/pull/731)
 
 ## 4. 프로젝트 기록과 추가 확인 항목
